@@ -200,7 +200,7 @@ def _get_upload_headers(file_obj):
     }
 
 
-def _build_http_request(session, url, method, headers=None, encoding=None, params=empty_params, stream=False):
+def _build_http_request(session, url, method, headers=None, encoding=None, params=empty_params):
     """
     Make an HTTP request and return an HTTP response.
     """
@@ -210,7 +210,6 @@ def _build_http_request(session, url, method, headers=None, encoding=None, param
 
     if params.query:
         opts['params'] = params.query
-    opts['stream'] = stream
 
     if params.data or params.files:
         if encoding == 'application/json':
@@ -227,7 +226,6 @@ def _build_http_request(session, url, method, headers=None, encoding=None, param
                 opts['data'] = params.data
             upload_headers = _get_upload_headers(params.data)
             opts['headers'].update(upload_headers)
-
     request = requests.Request(method, url, **opts)
     return session.prepare_request(request)
 
@@ -377,8 +375,8 @@ class HTTPTransport(BaseTransport):
         headers = _get_headers(url, decoders)
         headers.update(self.headers)
 
-        request = _build_http_request(session, url, method, headers, encoding, params, stream=stream)
-        with session.send(request) as response:
+        request = _build_http_request(session, url, method, headers, encoding, params)
+        with session.send(request, stream=True) as response:
             result = _decode_result(response, decoders, force_codec)
 
         if isinstance(result, Document) and link_ancestors:
