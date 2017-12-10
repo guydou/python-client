@@ -267,6 +267,9 @@ def _coerce_to_error(obj, default_title):
         return Error(title=default_title, content={'messages': obj})
     elif obj is None:
         return Error(title=default_title)
+    elif hasattr(obj, 'read'):
+        # dealing with the case the decoder returned a file
+        return Error(title=default_title, content={'messages': obj.read().decode("utf-8")})
     return Error(title=default_title, content={'message': obj})
 
 
