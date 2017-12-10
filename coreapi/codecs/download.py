@@ -109,11 +109,14 @@ class DownloadCodec(BaseCodec):
         self._delete_on_close = download_dir is None
         self._download_dir = download_dir
 
+    def support_streaming(self):
+        return True
+
     @property
     def download_dir(self):
         return self._download_dir
 
-    def decode(self, bytestring, **options):
+    def decode(self, chunks, **options):
         base_url = options.get('base_url')
         content_type = options.get('content_type')
         content_disposition = options.get('content_disposition')
@@ -121,7 +124,8 @@ class DownloadCodec(BaseCodec):
         # Write the download to a temporary .download file.
         fd, temp_path = tempfile.mkstemp(suffix='.download')
         file_handle = os.fdopen(fd, 'wb')
-        file_handle.write(bytestring)
+        for chunk in chunks:
+            file_handle.write(chunk)
         file_handle.close()
 
         # Determine the output filename.

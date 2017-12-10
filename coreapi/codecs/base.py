@@ -19,9 +19,14 @@ class BaseCodec(itypes.Object):
         # Fallback for v1.x interface
         return self.encode(*args, **kwargs)
 
-    def load(self, *args, **kwargs):
+    def support_streaming(self):
+        return False
+
+    def load(self, chunks, *args, **kwargs):
         # Fallback for v1.x interface
-        return self.decode(*args, **kwargs)
+        if not(self.support_streaming):
+            chunks = bytes().join(chunks) or bytes()
+        return self.decode(chunks, *args, **kwargs)
 
     @property
     def supports(self):

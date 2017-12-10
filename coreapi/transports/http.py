@@ -275,7 +275,8 @@ def _decode_result(response, decoders, force_codec=False):
     """
     Given an HTTP response, return the decoded Core API document.
     """
-    if response.content:
+    chunks = response.iter_content(1024)
+    if chunks:
         # Content returned in response. We should decode it.
         if force_codec:
             codec = decoders[0]
@@ -291,7 +292,7 @@ def _decode_result(response, decoders, force_codec=False):
         if 'content-disposition' in response.headers:
             options['content_disposition'] = response.headers['content-disposition']
 
-        result = codec.load(response.content, **options)
+        result = codec.load(chunks, **options)
     else:
         # No content returned in response.
         result = None
