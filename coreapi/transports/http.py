@@ -376,8 +376,9 @@ class HTTPTransport(BaseTransport):
         headers.update(self.headers)
 
         request = _build_http_request(session, url, method, headers, encoding, params)
-        with session.send(request, stream=stream) as response:
-            result = _decode_result(response, decoders, force_codec)
+        response = session.send(request, stream=stream)
+        result = _decode_result(response, decoders, force_codec)
+        response.close()
 
         if isinstance(result, Document) and link_ancestors:
             result = _handle_inplace_replacements(result, link, link_ancestors)

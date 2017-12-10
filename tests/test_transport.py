@@ -26,8 +26,13 @@ class MockResponse(object):
         self.url = 'http://example.org'
         self.status_code = 200
 
+    def iter_content(self, *args, **kwargs):
+        return self.content
 
+    def close(self):
+        return
 # Test transport errors.
+
 
 def test_unknown_scheme():
     with pytest.raises(NetworkError):
