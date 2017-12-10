@@ -24,7 +24,7 @@ class BaseCodec(itypes.Object):
 
     def load(self, chunks, *args, **kwargs):
         # Fallback for v1.x interface
-        if not(self.support_streaming):
+        if not(self.support_streaming()):
             chunks = bytes().join(chunks) or bytes()
         return self.decode(chunks, *args, **kwargs)
 
