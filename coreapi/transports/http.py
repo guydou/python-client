@@ -12,6 +12,7 @@ import itypes
 import mimetypes
 import uritemplate
 import warnings
+import io
 
 
 Params = collections.namedtuple('Params', ['path', 'query', 'data', 'files'])
@@ -86,7 +87,14 @@ def _get_method(action):
     return action.upper()
 
 
-def _get_encoding(encoding):
+def _get_encoding(encoding, params):
+    has_file = False
+    if params is not None:
+        for value in params.values():
+            if hasattr(value, 'read'):
+                has_file = True
+    if has_file:
+        return 'multipart/form-data'
     if not encoding:
         return 'application/json'
     return encoding
@@ -372,7 +380,7 @@ class HTTPTransport(BaseTransport):
     def transition(self, link, decoders, params=None, link_ancestors=None, force_codec=False, stream=False):
         session = self._session
         method = _get_method(link.action)
-        encoding = _get_encoding(link.encoding)
+        encoding = _get_encoding(link.encoding, params)
         params = _get_params(method, encoding, link.fields, params)
         url = _get_url(link.url, params.path)
         headers = _get_headers(url, decoders)
@@ -380,7 +388,9 @@ class HTTPTransport(BaseTransport):
 
         request = _build_http_request(session, url, method, headers, encoding, params)
         response = session.send(request, stream=stream)
-        result = _decode_result(response, decoders, force_codec)
+        result = None
+        if response.status_code != 204:  # no content
+            result = _decode_result(response, decoders, force_codec)
         response.close()
 
         if isinstance(result, Document) and link_ancestors:
