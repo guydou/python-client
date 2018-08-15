@@ -81,7 +81,6 @@ def test_get_with_parameters(monkeypatch, http):
 
 
 def test_get_with_path_parameter(monkeypatch, http):
-
     def mockreturn(self, request, *args, **kwargs):
         insert = request.url.encode('utf-8')
         return MockResponse(
@@ -100,9 +99,7 @@ def test_get_with_path_parameter(monkeypatch, http):
 
 
 def test_post(monkeypatch, http):
-
     def mockreturn(self, request, *args, **kwargs):
-
         codec = CoreJSONCodec()
         body = force_text(request.body)
         content = codec.encode(Document(content={'data': json.loads(body)}))
@@ -116,7 +113,6 @@ def test_post(monkeypatch, http):
 
 
 def test_delete(monkeypatch, http):
-
     def mockreturn(self, request, *args, **kwargs):
         return MockResponse(b'')
 
