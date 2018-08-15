@@ -54,7 +54,6 @@ def test_missing_hostname():
 # Test basic transition types.
 
 def test_get(monkeypatch, http):
-
     def mockreturn(self, request, *args, **kwargs):
         return MockResponse(b'{"_type": "document", "example": 123}')
 
@@ -66,7 +65,6 @@ def test_get(monkeypatch, http):
 
 
 def test_get_with_parameters(monkeypatch, http):
-
     def mockreturn(self, request, *args, **kwargs):
         insert = request.path_url.encode('utf-8')
         return MockResponse(
