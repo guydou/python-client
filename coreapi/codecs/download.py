@@ -8,6 +8,7 @@ import posixpath
 import tempfile
 from tqdm import tqdm
 
+
 def _unique_output_path(path):
     """
     Given a path like '/a/b/c.txt'
