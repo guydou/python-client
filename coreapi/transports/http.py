@@ -12,8 +12,6 @@ import itypes
 import mimetypes
 import uritemplate
 import warnings
-import io
-import math
 
 
 Params = collections.namedtuple('Params', ['path', 'query', 'data', 'files'])
@@ -286,7 +284,7 @@ def _decode_result(response, decoders, force_codec=False):
     """
     Given an HTTP response, return the decoded Core API document.
     """
-    chunk_size = 1024*1024
+    chunk_size = 1024 * 1024
     chunks = response.iter_content(chunk_size)
     if chunks:
         # Content returned in response. We should decode it.
@@ -304,8 +302,7 @@ def _decode_result(response, decoders, force_codec=False):
         if 'content-disposition' in response.headers:
             options['content_disposition'] = response.headers['content-disposition']
         if 'content-length' in response.headers:
-            options["content-length"] = int(response.headers["content-length"])/chunk_size
-            
+            options["content-length"] = int(response.headers["content-length"]) / chunk_size
         result = codec.load(chunks, **options)
     else:
         # No content returned in response.
