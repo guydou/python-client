@@ -49,7 +49,6 @@ def test_dump(document):
 
 
 def test_get(monkeypatch):
-
     def mockreturn(self, request, *args, **kwargs):
         return MockResponse(b'{"_type": "document", "example": 123}')
 
@@ -61,7 +60,6 @@ def test_get(monkeypatch):
 
 
 def test_follow(monkeypatch, document):
-
     def mockreturn(self, request, *args, **kwargs):
         return MockResponse(b'{"_type": "document", "example": 123}')
 
@@ -73,7 +71,6 @@ def test_follow(monkeypatch, document):
 
 
 def test_reload(monkeypatch):
-
     def mockreturn(self, request, *args, **kwargs):
         return MockResponse(b'{"_type": "document", "example": 123}')
 
@@ -86,7 +83,6 @@ def test_reload(monkeypatch):
 
 
 def test_error(monkeypatch, document):
-
     def mockreturn(self, request, *args, **kwargs):
         return MockResponse(b'{"_type": "error", "message": ["failed"]}')
 
