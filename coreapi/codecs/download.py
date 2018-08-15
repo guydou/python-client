@@ -6,7 +6,7 @@ import cgi
 import os
 import posixpath
 import tempfile
-
+from tqdm import tqdm
 
 def _unique_output_path(path):
     """
@@ -102,12 +102,13 @@ class DownloadCodec(BaseCodec):
     media_type = '*/*'
     format = 'download'
 
-    def __init__(self, download_dir=None):
+    def __init__(self, download_dir=None, progress_bar=False):
         """
         `download_dir` - The path to use for file downloads.
         """
         self._delete_on_close = download_dir is None
         self._download_dir = download_dir
+        self._progress_bar = progress_bar
 
     def support_streaming(self):
         return True
@@ -122,8 +123,11 @@ class DownloadCodec(BaseCodec):
         content_disposition = options.get('content_disposition')
 
         # Write the download to a temporary .download file.
-        fd, temp_path = tempfile.mkstemp(suffix='.download')
+        fd, temp_path = tempfile.mkstemp(suffix='.download', dir=self._download_dir)
         file_handle = os.fdopen(fd, 'wb')
+        content_length = options.get("content-length", None)
+        if content_length and self._progress_bar:
+            chunks = tqdm(chunks, total=content_length, unit="mb")
         for chunk in chunks:
             file_handle.write(chunk)
         file_handle.close()
