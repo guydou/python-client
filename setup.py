@@ -66,7 +66,8 @@ setup(
         'coreschema',
         'requests',
         'itypes',
-        'uritemplate'
+        'uritemplate',
+        'tqdm'
     ],
     entry_points={
         'coreapi.codecs': [
