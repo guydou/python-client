@@ -54,7 +54,7 @@ def test_missing_hostname():
 # Test basic transition types.
 
 def test_get(monkeypatch, http):
-    def mockreturn(self, request, **kwargs):
+    def mockreturn(self, request, *args, **kwargs):
         return MockResponse(b'{"_type": "document", "example": 123}')
 
     monkeypatch.setattr(requests.Session, 'send', mockreturn)
@@ -65,7 +65,7 @@ def test_get(monkeypatch, http):
 
 
 def test_get_with_parameters(monkeypatch, http):
-    def mockreturn(self, request, **kwargs):
+    def mockreturn(self, request, *args, **kwargs):
         insert = request.path_url.encode('utf-8')
         return MockResponse(
             b'{"_type": "document", "url": "' + insert + b'"}'
@@ -79,7 +79,7 @@ def test_get_with_parameters(monkeypatch, http):
 
 
 def test_get_with_path_parameter(monkeypatch, http):
-    def mockreturn(self, request, **kwargs):
+    def mockreturn(self, request, *args, **kwargs):
         insert = request.url.encode('utf-8')
         return MockResponse(
             b'{"_type": "document", "example": "' + insert + b'"}'
@@ -97,7 +97,7 @@ def test_get_with_path_parameter(monkeypatch, http):
 
 
 def test_post(monkeypatch, http):
-    def mockreturn(self, request, **kwargs):
+    def mockreturn(self, request, *args, **kwargs):
         codec = CoreJSONCodec()
         body = force_text(request.body)
         content = codec.encode(Document(content={'data': json.loads(body)}))
@@ -111,7 +111,7 @@ def test_post(monkeypatch, http):
 
 
 def test_delete(monkeypatch, http):
-    def mockreturn(self, request, **kwargs):
+    def mockreturn(self, request, *args, **kwargs):
         return MockResponse(b'')
 
     monkeypatch.setattr(requests.Session, 'send', mockreturn)

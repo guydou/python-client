@@ -388,6 +388,8 @@ class HTTPTransport(BaseTransport):
         headers.update(self.headers)
 
         request = _build_http_request(session, url, method, headers, encoding, params)
+
+        settings = session.merge_environment_settings(request.url, None, None, None, None)
         response = session.send(request, stream=stream)
         result = None
         if response.status_code != 204:  # no content
