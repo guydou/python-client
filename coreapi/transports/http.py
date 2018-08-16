@@ -13,6 +13,16 @@ import mimetypes
 import uritemplate
 import warnings
 from requests_toolbelt.multipart.encoder import MultipartEncoder, MultipartEncoderMonitor
+import tqdm
+
+def tqdm_callback(encoder):
+    bar = tqdm.tqdm(total=encoder.len, unit="b")
+
+    def callback(monitor):
+        bar.update(monitor.bytes_read - bar.n)
+
+    return callback
+
 
 Params = collections.namedtuple('Params', ['path', 'query', 'data', 'files'])
 empty_params = Params({}, {}, {}, {})
@@ -232,8 +242,9 @@ def _build_http_request(session, url, method, headers=None, encoding=None, param
             for k,v in params.files.items():
                 send_data.append((k, (guess_filename(v) or k, v, 'application/*')))
             e = MultipartEncoder(send_data)
-            opts['data'] = e
-            opts['headers'].update({'Content-Type': e.content_type})
+            monitor = MultipartEncoderMonitor(e, callback=tqdm_callback(e))
+            opts['data'] = monitor
+            opts['headers'].update({'Content-Type': monitor.content_type})
         elif encoding == 'application/x-www-form-urlencoded':
             opts['data'] = params.data
         elif encoding == 'application/octet-stream':
@@ -243,7 +254,6 @@ def _build_http_request(session, url, method, headers=None, encoding=None, param
                 opts['data'] = params.data
             upload_headers = _get_upload_headers(params.data)
             opts['headers'].update(upload_headers)
-    print(opts['headers'])
     request = requests.Request(method, url, **opts)
     return session.prepare_request(request)
 
