@@ -3,6 +3,7 @@ coreschema
 itypes
 requests
 uritemplate
+tqdm
 
 # Testing requirements
 coverage

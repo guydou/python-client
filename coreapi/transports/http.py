@@ -86,7 +86,14 @@ def _get_method(action):
     return action.upper()
 
 
-def _get_encoding(encoding):
+def _get_encoding(encoding, params):
+    has_file = False
+    if params is not None:
+        for value in params.values():
+            if hasattr(value, 'read'):
+                has_file = True
+    if has_file:
+        return 'multipart/form-data'
     if not encoding:
         return 'application/json'
     return encoding
@@ -226,7 +233,6 @@ def _build_http_request(session, url, method, headers=None, encoding=None, param
                 opts['data'] = params.data
             upload_headers = _get_upload_headers(params.data)
             opts['headers'].update(upload_headers)
-
     request = requests.Request(method, url, **opts)
     return session.prepare_request(request)
 
@@ -277,7 +283,9 @@ def _decode_result(response, decoders, force_codec=False):
     """
     Given an HTTP response, return the decoded Core API document.
     """
-    if response.content:
+    chunk_size = 1024 * 1024
+    chunks = response.iter_content(chunk_size)
+    if chunks:
         # Content returned in response. We should decode it.
         if force_codec:
             codec = decoders[0]
@@ -292,8 +300,9 @@ def _decode_result(response, decoders, force_codec=False):
             options['content_type'] = response.headers['content-type']
         if 'content-disposition' in response.headers:
             options['content_disposition'] = response.headers['content-disposition']
-
-        result = codec.load(response.content, **options)
+        if 'content-length' in response.headers:
+            options["content-length"] = int(response.headers["content-length"]) / chunk_size
+        result = codec.load(chunks, **options)
     else:
         # No content returned in response.
         result = None
@@ -368,19 +377,24 @@ class HTTPTransport(BaseTransport):
     def headers(self):
         return self._headers
 
-    def transition(self, link, decoders, params=None, link_ancestors=None, force_codec=False):
+    def transition(self, link, decoders, params=None, link_ancestors=None, force_codec=False, stream=False):
         session = self._session
         method = _get_method(link.action)
-        encoding = _get_encoding(link.encoding)
+        encoding = _get_encoding(link.encoding, params)
         params = _get_params(method, encoding, link.fields, params)
         url = _get_url(link.url, params.path)
         headers = _get_headers(url, decoders)
         headers.update(self.headers)
 
         request = _build_http_request(session, url, method, headers, encoding, params)
+
         settings = session.merge_environment_settings(request.url, None, None, None, None)
+        settings["stream"] = stream
         response = session.send(request, **settings)
-        result = _decode_result(response, decoders, force_codec)
+        result = None
+        if response.status_code != 204:  # no content
+            result = _decode_result(response, decoders, force_codec)
+        response.close()
 
         if isinstance(result, Document) and link_ancestors:
             result = _handle_inplace_replacements(result, link, link_ancestors)

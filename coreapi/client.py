@@ -140,7 +140,7 @@ class Client(itypes.Object):
         return self.get(document.url, format=format, force_codec=force_codec)
 
     def action(self, document, keys, params=None, validate=True, overrides=None,
-               action=None, encoding=None, transform=None):
+               action=None, encoding=None, transform=None, stream=False):
         if (action is not None) or (encoding is not None) or (transform is not None):
             # Fallback for v1.x overrides.
             # Will be removed at some point, most likely in a 2.1 release.
@@ -175,4 +175,4 @@ class Client(itypes.Object):
 
         # Perform the action, and return a new document.
         transport = determine_transport(self.transports, link.url)
-        return transport.transition(link, self.decoders, params=params, link_ancestors=link_ancestors)
+        return transport.transition(link, self.decoders, params=params, link_ancestors=link_ancestors, stream=stream)
