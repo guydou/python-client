@@ -4,6 +4,7 @@ itypes
 requests
 uritemplate
 tqdm
+requests-toolbelt
 
 # Testing requirements
 coverage

@@ -67,7 +67,8 @@ setup(
         'requests',
         'itypes',
         'uritemplate',
-        'tqdm'
+        'tqdm',
+        'requests-toolbelt'
     ],
     entry_points={
         'coreapi.codecs': [
